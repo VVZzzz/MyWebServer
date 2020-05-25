@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-//包裹AppendFile一层,为的是每append n 次,就flush一次
+//包裹AppendFile(FileUtil)一层,为的是每append n 次,就flush一次
 class LogFile:public noncopyable{
     public:
     LogFile(const std::string &str,int n = 1024);
