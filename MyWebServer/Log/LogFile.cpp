@@ -6,7 +6,7 @@
 
 using namespace std;
 
-LogFile::LogFile(const std::string &str, int n = 1024)
+LogFile::LogFile(const std::string &str, int n)
     : basename_(str), everyNAppendFlush_(n), count_(0), mutex_(new MutexLock) {
   file_.reset(new AppendFile(basename_));
 }

@@ -1,0 +1,31 @@
+include_directories(
+    ${PROJECT_SOURCE_DIR}/Thread
+    ${PROJECT_SOURCE_DIR}/Log
+    )
+
+
+
+#add_executable(WebServer ${SRCS})
+#target_link_libraries(WebServer libserver_base)
+
+#add_library(libserver_base)
+#target_link_libraries(libserver_base pthread rt)
+#set_target_properties(libserver_base PROPERTIES OUTPUT_NAME "server_base")
+
+# 生成libserver_base库
+set(LIB_SRC 
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Thread/Thread.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Thread/CountDownLatch.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Log/AsyncLogging.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Log/FileUtil.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Log/LogFile.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Log/Logging.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Log/LogStream.cpp
+)
+add_library(libserver_base ${LIB_SRC})
+target_link_libraries(libserver_base pthread rt)
+set_target_properties(libserver_base PROPERTIES OUTPUT_NAME "server_base")
+
+#编译以下文件夹
+add_subdirectory(Log)
+add_subdirectory(Thread)

@@ -1,8 +1,9 @@
 #pragma once
-#include <string>
 #include <string.h>
 
-#include "Thread/noncopyable.h"
+#include <string>
+
+#include "../Thread/noncopyable.h"
 
 const int kSmallBuffer = 4000;
 const int kLargeBuffer = 4000 * 1000;
@@ -45,7 +46,7 @@ class LogStream : noncopyable {
   typedef FixedBuffer<kSmallBuffer> Buffer;
 
   //重载一系列<<操作符
-  //bool变量输出为1 0
+  // bool变量输出为1 0
   LogStream& operator<<(bool v) {
     buffer_.append(v ? "1" : "0", 1);
     return *this;
@@ -83,7 +84,7 @@ class LogStream : noncopyable {
   }
 
   LogStream& operator<<(const unsigned char* str) {
-      //注意此处使用reinterpret_cast
+    //注意此处使用reinterpret_cast
     return operator<<(reinterpret_cast<const char*>(str));
   }
 

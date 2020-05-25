@@ -1,8 +1,10 @@
 #pragma once
 #include <pthread.h>
+
 #include <cassert>
-#include "Thread/CurrentThread.h"
-#include "Thread/noncopyable.h"
+
+#include "CurrentThread.h"
+#include "noncopyable.h"
 class MutexLock : noncopyable {
  public:
   MutexLock() : hold_thread_(0) { pthread_mutex_init(&mutex_, NULL); }
@@ -23,7 +25,7 @@ class MutexLock : noncopyable {
   }
   //用来assert(在被锁时用)
   bool isLockedByThread() const { return hold_thread_ == CurrentThread::tid(); }
-  pthread_mutex_t *get() {return &mutex_;}
+  pthread_mutex_t* get() { return &mutex_; }
 
  private:
   // friend class Condition;
@@ -46,4 +48,3 @@ class MutexLockGuard : noncopyable {
  private:
   MutexLock& mutex_;  //在Guard看来MutexLock就是mutex;
 };
-
