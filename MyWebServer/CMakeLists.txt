@@ -21,6 +21,11 @@ set(LIB_SRC
     ${PROJECT_SOURCE_DIR}/MyWebServer/Log/LogFile.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Log/Logging.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Log/LogStream.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/EventLoop.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Poller.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Channel.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/PollPoller.cpp
+    
 )
 add_library(libserver_base ${LIB_SRC})
 target_link_libraries(libserver_base pthread rt)
@@ -29,3 +34,4 @@ set_target_properties(libserver_base PROPERTIES OUTPUT_NAME "server_base")
 #编译以下文件夹
 add_subdirectory(Log)
 add_subdirectory(Thread)
+add_subdirectory(Net)
