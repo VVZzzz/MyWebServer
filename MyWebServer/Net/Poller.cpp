@@ -10,8 +10,8 @@ bool Poller::hasChannel(Channel *channel) const {
   return itr != channels_.end() && itr->second == channel;
 }
 Poller *Poller::newDefaultPoller(EventLoop *loop) {
-  if (::getenv("USE_POLL"))
-    return new PollPoller(loop);
+  //if (::getenv("USE_POLL"))
+    //return new PollPoller(loop);
   //else
   //  return new EPollPoller(loop);
 }

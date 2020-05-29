@@ -51,6 +51,7 @@ void PollPoller::fillActiveChannels(int numEvents,
   }
 }
 
+/*
 //维护和更新pollfds_数组,添加新的Channel复杂度为O(logN)
 //更新已有的Channel为O(1),因为index()可获取下标
 // removeChannel是O(logN)
@@ -82,7 +83,9 @@ void PollPoller::updateChannel(Channel* channel) {
     }
   }
 }
+*/
 
+/*
 void PollPoller::removeChannel(Channel* channel) {
   LOG << "remove channel fd = " << channel->getFd();
   assert(channels_.find(channel->getFd()) != channels_.end());
@@ -110,3 +113,4 @@ void PollPoller::removeChannel(Channel* channel) {
     pollfds_.pop_back();
   }
 }
+*/

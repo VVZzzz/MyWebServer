@@ -1,4 +1,5 @@
 #pragma once
+#include <poll.h>
 #include <sys/epoll.h>
 
 #include <functional>
@@ -8,6 +9,7 @@
 
 //#include "Timer.h"
 #include "../Thread/noncopyable.h"
+#include "Util.h"
 
 //每个Channel对象只属于一个Eventloop,故只属于一个IO线程
 //只负责一个fd的IO事件分发,但并不拥有该fd
@@ -45,22 +47,35 @@ class Channel : noncopyable {
   }
   __uint32_t getLastEvents() { return lastEvents_; }
 
+  //包裹一层event
+  /*
+  void enableReading() { events_ |= READEVENT; update(); }
+  void disableReading() { events_ &= ~READEVENT; update(); }
+  void enableWriting() { events_ |= WRITEEVENT; update(); }
+  void disableWriting() { events_ &= ~WRITEEVENT; update(); }
+  void disableAll() { events_ = 0; update(); }
+  bool isWriting() const { return events_ & WRITEEVENT; }
+  bool isReading() const { return events_ & READEVENT; }
+  */
+  
+
+
   // 处理events
   void handleEvents() {
     events_ = 0;
     //写端挂起且无数据接收到
-    if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
+    if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
       events_ = 0;
       return;
     }
     //发生错误
-    if (revents_ & EPOLLERR) {
+    if (revents_ & POLLERR) {
       if (errorHandler_) errorHandler_();
       events_ = 0;
       return;
     }
     //有数据来或者是对方发来关闭连接请求(EPOLLRDHUP事件)
-    if (revents_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
+    if (revents_ & (POLLIN | POLLPRI | POLLRDHUP)) {
       handleRead();
     }
     if (revents_ & EPOLLOUT) {
@@ -75,13 +90,18 @@ class Channel : noncopyable {
   void handleConn();
 
   // for poller
-  int index() { return index_; }
-  void set_index(int idx) { index_ = idx; }
+  //int index() { return index_; }
+  //void set_index(int idx) { index_ = idx; }
+
+  //inner usage
+  //void remove();
 
  private:
+ //inter usage 将channelupdate到loop里
+ //void update();
   EventLoop *loop_;
   int fd_;
-  int index_;  // channel在ChannelList的下标
+  //int index_;  // channel在ChannelList的下标
 
   __uint32_t events_;   //关心的事件
   __uint32_t revents_;  //目前活动的事件
@@ -92,3 +112,5 @@ class Channel : noncopyable {
   CallBack errorHandler_;
   CallBack connHandler_;
 };
+
+typedef std::shared_ptr<Channel> SP_Channel;

@@ -25,6 +25,7 @@ set(LIB_SRC
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Poller.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Channel.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/PollPoller.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Util.cpp
     
 )
 add_library(libserver_base ${LIB_SRC})

@@ -1,8 +1,11 @@
 #include "EventLoop.h"
 
 #include <poll.h>
+#include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
+
+#include <vector>
 
 #include "../Log/Logging.h"
 #include "Channel.h"
@@ -32,19 +35,30 @@ EventLoop::EventLoop()
     : looping_(false),
       threadId_(CurrentThread::tid()),
       quit_(false),
+      // poller_(Poller::newDefaultPoller(this)),
       poller_(Poller::newDefaultPoller(this)),
       callingPendingFunctors_(false),
       eventHandling_(false),
-      wakeupFd_(createEventfd()) {
+      wakeupFd_(createEventfd()),
+      wakeupChannel_(new Channel(this, wakeupFd_)) {
   if (t_loopInThisThread)
     LOG << "Another EventLoop " << t_loopInThisThread
         << " exists in this thread " << threadId_;
   else
     t_loopInThisThread = this;
+  // poll和epoll两种复用模型,epoll采用EPOLLET触发
+  // wakeupChannel_->setReadHandler(std::bind(&EventLoop::handleRead,this));
+  // wakeupChannel_->enableReading();
+  wakeupChannel_->setEvents(READEVENT);
+  wakeupChannel_->setReadHandler(bind(&EventLoop::handleRead, this));
+  wakeupChannel_->setConnHandler(bind(&EventLoop::handleConn, this));
+  poller_->epoll_add(pwakeupChannel_, 0);
 }
 
 EventLoop::~EventLoop() {
   assert(!looping_);
+  // wakeupChannel_->disableAll();
+  // wakeupChannel_->remove();
   close(wakeupFd_);
   t_loopInThisThread = NULL;
 }
@@ -56,17 +70,23 @@ void EventLoop::loop() {
   looping_ = true;
   quit_ = false;
   // LOG << "EventLoop " << this << " start looping";
+  //局部vector 存放有事件的Channel
+  std::vector<SP_Channel> ret;
   while (!quit_) {
-    activeChannels_.clear();
+    // activeChannels_.clear();
+    ret.clear();
     // IO线程阻塞在此处
     //其中wakeup就是在此处进行唤醒
-    poller_->poll(kPollTimeMs, &activeChannels_);
+    // poller_->poll(kPollTimeMs, &activeChannels_);
+    ret = poller_->poll();
     //处理poll拿到的事件
     eventHandling_ = true;
-    for (auto &itr : activeChannels_) itr->handleEvents();
+    for (auto &itr : ret) itr->handleEvents();
     eventHandling_ = false;
     //处理用户定义的回调事件(即pendingFunctors中的函数)
     doPendingFunctors();
+    //处理定时器超时事件
+    poller_->handleExpired();
   }
   // LOG << "EventLoop " << this << " stop looping";
   looping_ = false;
@@ -81,9 +101,17 @@ void EventLoop::quit() {
   }
 }
 
+/*
 void EventLoop::updateChannel(Channel *channel) {
   poller_->updateChannel(channel);
 }
+void EventLoop::removeChannel(Channel *channel) {
+  poller_->removeChannel(channel);
+}
+bool EventLoop::hasChannel(Channel *channel) {
+  return poller_->hasChannel(channel);
+}
+*/
 
 //这个函数主要用于在IO线程中执行用户回调cb()
 //如果不是在本线程调用的runInLoop,那么就将此cb()
@@ -140,4 +168,10 @@ void EventLoop::handleRead() {
   if (n != sizeof one) {
     LOG << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
   }
+}
+
+void EventLoop::handleConn() {
+  //更新Channle指针
+  // updateChannel(wakeupChannel_.get());
+  updateToPoller(wakeupChannel_, 0);
 }

@@ -4,12 +4,30 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <poll.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 const int MAX_BUFF = 4096;
+
+//为避免转换次数过多,使用这个全局变量
+//其中epoll采用ET触发,而不用LT触发
+// On Linux, the constants of poll(2) and epoll(4)
+// are expected to be the same.
+static_assert(EPOLLIN == POLLIN,        "epoll uses same flag values as poll");
+static_assert(EPOLLPRI == POLLPRI,      "epoll uses same flag values as poll");
+static_assert(EPOLLOUT == POLLOUT,      "epoll uses same flag values as poll");
+static_assert(EPOLLRDHUP == POLLRDHUP,  "epoll uses same flag values as poll");
+static_assert(EPOLLERR == POLLERR,      "epoll uses same flag values as poll");
+static_assert(EPOLLHUP == POLLHUP,      "epoll uses same flag values as poll");
+const int READEVENT = (::getenv("USE_POLL") ? (POLLIN | POLLPRI)
+                                            : (EPOLLIN | EPOLLPRI | EPOLLET));
+const int WRITEEVENT = (::getenv("USE_POLL") ? (POLLOUT)
+                                            : (EPOLLOUT | EPOLLET));
 
 ssize_t readn(int fd, void *buff, size_t n) {
   size_t nleft = n;
