@@ -10,6 +10,8 @@
 
 extern const int READEVENT;
 extern const int WRITEEVENT;
+extern const int EVENTSUM; 
+extern const int EPOLLWAIT_TIME;
 
 ssize_t readn(int fd , void *buff,size_t n);
 ssize_t readn(int fd, std::string &inBuffer, bool &zero);

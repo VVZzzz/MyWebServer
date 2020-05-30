@@ -12,7 +12,8 @@
 #include "../Thread/CurrentThread.h"
 #include "../Thread/Thread.h"
 #include "../Thread/noncopyable.h"
-class Poller;
+#include "EPoller.h"
+class HttpData;
 class Channel;
 
 class EventLoop : noncopyable {
@@ -65,7 +66,7 @@ class EventLoop : noncopyable {
   std::atomic<bool> quit_;
   int wakeupFd_;
   //std::unique_ptr<Poller> poller_;
-  std::shared_ptr<Epoll> poller_;
+  std::shared_ptr<Epoller<HttpData>> poller_;
   //ChannelList activeChannels_;  //存放活动的Channel
   mutable MutexLock mutex_;     //锁pendingFunctors_
   std::vector<Functor>

@@ -36,7 +36,7 @@ EventLoop::EventLoop()
       threadId_(CurrentThread::tid()),
       quit_(false),
       // poller_(Poller::newDefaultPoller(this)),
-      poller_(Poller::newDefaultPoller(this)),
+      poller_(new Epoller<HttpData>()),
       callingPendingFunctors_(false),
       eventHandling_(false),
       wakeupFd_(createEventfd()),
@@ -52,7 +52,7 @@ EventLoop::EventLoop()
   wakeupChannel_->setEvents(READEVENT);
   wakeupChannel_->setReadHandler(bind(&EventLoop::handleRead, this));
   wakeupChannel_->setConnHandler(bind(&EventLoop::handleConn, this));
-  poller_->epoll_add(pwakeupChannel_, 0);
+  poller_->epoll_add(wakeupChannel_, 0);
 }
 
 EventLoop::~EventLoop() {

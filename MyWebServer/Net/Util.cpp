@@ -28,6 +28,10 @@ const int READEVENT = (::getenv("USE_POLL") ? (POLLIN | POLLPRI)
                                             : (EPOLLIN | EPOLLPRI | EPOLLET));
 const int WRITEEVENT = (::getenv("USE_POLL") ? (POLLOUT)
                                             : (EPOLLOUT | EPOLLET));
+                                    
+//epoll监听事件总数,等待事件
+const int EVENTSNUM = 4096;
+const int EPOLLWAIT_TIME = 10000;  //ms
 
 ssize_t readn(int fd, void *buff, size_t n) {
   size_t nleft = n;

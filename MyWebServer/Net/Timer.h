@@ -15,7 +15,7 @@ template <typename T>
 class TimerNode {
  public:
   TimerNode(std::shared_ptr<T> requestData, int timeout);
-  TimerNode(TimerNode<T> &tn);
+  // TimerNode(TimerNode<T> &tn);
   ~TimerNode();
   void update(int timeout);
   bool isValid();
@@ -39,9 +39,11 @@ TimerNode<T>::TimerNode(std::shared_ptr<T> requestData, int timeout)
       (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
 }
 
+/*
 template <typename T>
 TimerNode<T>::TimerNode(TimerNode<T> &tn)
     : SPData_(tn.SPData_), expiredTime_(0) {}
+    */
 
 template <typename T>
 TimerNode<T>::~TimerNode() {
@@ -75,6 +77,7 @@ void TimerNode<T>::clearReq() {
   this->setDeleted();
 }
 
+template <typename T>
 struct TimerCmp {
   bool operator()(std::shared_ptr<TimerNode<T>> &a,
                   std::shared_ptr<TimerNode<T>> &b) const {

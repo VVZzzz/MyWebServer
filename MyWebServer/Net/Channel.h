@@ -1,9 +1,9 @@
 #pragma once
+#include <memory>
+#include <functional>
 #include <poll.h>
 #include <sys/epoll.h>
 
-#include <functional>
-#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -15,7 +15,7 @@
 //只负责一个fd的IO事件分发,但并不拥有该fd
 //析构时并不关闭fd
 class EventLoop;
-class Channel : noncopyable {
+class Channel {
  public:
   typedef std::function<void()> CallBack;
   Channel(EventLoop *loop);
@@ -57,8 +57,6 @@ class Channel : noncopyable {
   bool isWriting() const { return events_ & WRITEEVENT; }
   bool isReading() const { return events_ & READEVENT; }
   */
-  
-
 
   // 处理events
   void handleEvents() {
@@ -90,18 +88,27 @@ class Channel : noncopyable {
   void handleConn();
 
   // for poller
-  //int index() { return index_; }
-  //void set_index(int idx) { index_ = idx; }
+  // int index() { return index_; }
+  // void set_index(int idx) { index_ = idx; }
 
-  //inner usage
-  //void remove();
+  // inner usage
+  // void remove();
+
+  //for HTTPData
+  void setHolder(std::shared_ptr<void> holder){ holder_ = holder;}
+  std::shared_ptr<void> getHolder(){
+    std::shared_ptr<void> ret(holder_.lock());
+    return ret;
+  }
 
  private:
- //inter usage 将channelupdate到loop里
- //void update();
+  // inter usage 将channelupdate到loop里
+  // void update();
   EventLoop *loop_;
   int fd_;
-  //int index_;  // channel在ChannelList的下标
+  // int index_;  // channel在ChannelList的下标
+  //上层持有该Channel的对象,用void
+  std::weak_ptr<void> holder_;
 
   __uint32_t events_;   //关心的事件
   __uint32_t revents_;  //目前活动的事件
