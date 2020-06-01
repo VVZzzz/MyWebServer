@@ -13,6 +13,7 @@
 #include "../Thread/Thread.h"
 #include "../Thread/noncopyable.h"
 #include "EPoller.h"
+#include "Util.h"
 class HttpData;
 class Channel;
 
@@ -30,9 +31,10 @@ class EventLoop : noncopyable {
   void loop();
   void quit();  //跳出该loop
   void runInLoop(Functor &&cb);
-  void queueInLoop(
-      Functor &&
-          cb);  //别的线程会调用runInLoop进而调用queueInLoop,进而操作pendingFunctors_,故需锁保护
+  //别的线程会调用runInLoop进而调用queueInLoop,进而操作pendingFunctors_,故需锁保护
+  void queueInLoop(Functor &&cb);
+  //shutdown和close区别:https://blog.csdn.net/u012398613/article/details/42835723
+  void shutdown(std::shared_ptr<Channel> channel) {shutDownWR(channel->getFd());}
 
   // internal usage used by poller class
   /*
@@ -41,19 +43,20 @@ class EventLoop : noncopyable {
   bool hasChannel(Channel *channel);
   */
 
-  //used by epoll
-  void removedFromPoller(std::shared_ptr<Channel> channel){
-    //poller_->epoll_del(channel);
+  // used by epoll
+  void removedFromPoller(std::shared_ptr<Channel> channel) {
+    shutDownWR(channel->getFd());
+    poller_->epoll_del(channel);
   }
-  void updateToPoller(std::shared_ptr<Channel> channel,int timeout = 0){
-    //poller_->epoll_del(channel);
+  void updateToPoller(std::shared_ptr<Channel> channel, int timeout = 0) {
+    poller_->epoll_mod(channel,timeout);
   }
-  void addToPoller(std::shared_ptr<Channel> channel,int timeout = 0){
-    //poller_->epoll_del(channel);
+  void addToPoller(std::shared_ptr<Channel> channel, int timeout = 0) {
+    poller_->epoll_add(channel,timeout);
   }
 
  private:
-  //typedef std::vector<Channel *> ChannelList;
+  // typedef std::vector<Channel *> ChannelList;
   void abortNotInLoopThread() { abort(); }
   // internal usage
   void wakeup();
@@ -65,15 +68,15 @@ class EventLoop : noncopyable {
   const pid_t threadId_;  //持有本loop的threadId
   std::atomic<bool> quit_;
   int wakeupFd_;
-  //std::unique_ptr<Poller> poller_;
+  // std::unique_ptr<Poller> poller_;
   std::shared_ptr<Epoller<HttpData>> poller_;
-  //ChannelList activeChannels_;  //存放活动的Channel
-  mutable MutexLock mutex_;     //锁pendingFunctors_
+  // ChannelList activeChannels_;  //存放活动的Channel
+  mutable MutexLock mutex_;  //锁pendingFunctors_
   std::vector<Functor>
       pendingFunctors_;  //存放待回调的用户回调函数(即该thread一直loop,那么此时我想让这个线程干点其他的事)
   bool callingPendingFunctors_;  //是否正在执行pendingFunctors
   bool eventHandling_;           //是否正在处理event
 
-  //std::unique_ptr<Channel> wakeupChannel_;
+  // std::unique_ptr<Channel> wakeupChannel_;
   std::shared_ptr<Channel> wakeupChannel_;
 };

@@ -1,4 +1,9 @@
 #pragma once
+/**
+ * 该文件未被使用
+ * 原本是想用Poller作为基类,EPoller和PollPoller派生
+ * 对比两种IO复用技术,留待以后完善.
+ */
 #include <vector>
 
 #include "Channel.h"

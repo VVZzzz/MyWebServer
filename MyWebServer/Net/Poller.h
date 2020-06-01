@@ -1,5 +1,10 @@
 #pragma once
 /**
+ * 该文件未被使用
+ * 原本是想用Poller作为基类,EPoller和PollPoller派生
+ * 对比两种IO复用技术,留待以后完善.
+ */
+/**
  * Poller作为基类 , 具体实现类有Poll , 和EPOLL两个IO复用机制
  * 该类不拥有Channel objects
  */
