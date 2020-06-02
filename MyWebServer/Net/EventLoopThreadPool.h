@@ -19,7 +19,7 @@ class EventLoopThreadPool : noncopyable {
   bool started_;
   int numThreads_;   //开启的线程数
   int next_;  //指示下一个round robin拿到的线程的位置
-  //线程池: 用vector存储EventloopThread
+  //线程池: 用vector存储EventloopThread,对象自动析构:线程退出loop停止
   std::vector<std::shared_ptr<EventLoopThread>> threads_;
   std::vector<EventLoop*> loops_;
 };

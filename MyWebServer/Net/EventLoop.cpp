@@ -75,8 +75,9 @@ void EventLoop::loop() {
   while (!quit_) {
     // activeChannels_.clear();
     ret.clear();
-    // IO线程阻塞在此处
-    //其中wakeup就是在此处进行唤醒
+    // IO线程阻塞在此处,直到有事件并返回对应的那些channel
+    //其中wakeup就是在此处进行唤醒(即给wakeupfd发送一个字节的信息)
+    //之后进行doPendingFunctors
     // poller_->poll(kPollTimeMs, &activeChannels_);
     ret = poller_->poll();
     //处理poll拿到的事件

@@ -15,7 +15,7 @@ template <typename T>
 class TimerNode {
  public:
   TimerNode(std::shared_ptr<T> requestData, int timeout);
-  // TimerNode(TimerNode<T> &tn);
+  TimerNode(TimerNode<T> &tn);
   ~TimerNode();
   void update(int timeout);
   bool isValid();
@@ -39,15 +39,15 @@ TimerNode<T>::TimerNode(std::shared_ptr<T> requestData, int timeout)
       (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
 }
 
-/*
 template <typename T>
 TimerNode<T>::TimerNode(TimerNode<T> &tn)
     : SPData_(tn.SPData_), expiredTime_(0) {}
-    */
 
 template <typename T>
 TimerNode<T>::~TimerNode() {
-  // if(SPData_) SPData->handleClose();
+  //注意此处,这里是处理定时器超时事件的核心.
+  //即析构超时的定时器节点时,进行handleClose
+  if(SPData_) SPData->handleClose();
 }
 
 template <typename T>
@@ -100,7 +100,7 @@ class TimerManager {
 
  private:
   typedef std::shared_ptr<TimerNode<T>> SPTimerNode;
-  std::priority_queue<SPTimerNode, std::deque<SPTimerNode>, TimerCmp>
+  std::priority_queue<SPTimerNode, std::deque<SPTimerNode>, TimerCmp<SPTimerNode>>
       timerNodeQueue_;
 };
 
@@ -108,7 +108,7 @@ template <typename T>
 void TimerManager<T>::addTimer(std::shared_ptr<T> SPData, int timeout) {
   SPTimerNode node(new TimerNode<T>(SPData, timeout));
   timerNodeQueue_.push(new_node);
-  // SPData->linkTimer(new_node);
+  SPData->linkTimer(new_node);
 }
 
 /**
@@ -124,6 +124,11 @@ void TimerManager<T>::addTimer(std::shared_ptr<T> SPData, int timeout) {
  * 2.给超时时间一个容忍的时间，就是设定的超时时间是删除的下限(并不是一到超时时间就立即删除)，
  * 如果监听的请求在超时后的下一次请求中又一次出现了，
  * 就不用再重新申请RequestData节点了，这样可以继续重复利用前面的RequestData，减少了一次delete和一次new的时间。
+ * 
+ * 这样做也有缺点:因为只有定时器节点真正删除的时候,才会处理handleClose
+ * 即断开超时的连接 handleClose(),这样的话可能造成定时器不是太准确,因为只有在
+ * loop循环中,poll返回了(有事件就绪或者超过10s等待时间)才能处理定时器超时事件.
+ * 这里没有用信号进行打断,多线程程序中最好不用信号
  *
  */
 template <typename T>

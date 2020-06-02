@@ -15,6 +15,7 @@
 class EventLoopThread : noncopyable {
  public:
   EventLoopThread();
+  //对象析构,loop循环停止,线程退出
   ~EventLoopThread();
   //EventLoop指针生存周期和开启的IO线程一样,这点注意
   EventLoop *startloop();

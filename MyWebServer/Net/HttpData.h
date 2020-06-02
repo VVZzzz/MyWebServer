@@ -15,7 +15,6 @@
 #include "Timer.h"
 
 class EventLoop;
-class TimerNode;
 
 //解析整体报文的状态:主状态机
 //后面的为从状态机
@@ -76,7 +75,7 @@ class HttpData : public std::enable_shared_from_this<HttpData> {
   ~HttpData() { close(fd_); }
   void reset();
   void seperateTimer();
-  void linkTimer(std::shared_ptr<TimerNode> mtimer) { timer_ = mtimer; }
+  void linkTimer(std::shared_ptr<TimerNode<HttpData>> mtimer) { timer_ = mtimer; }
   void handleClose();
   void newEvent();
 

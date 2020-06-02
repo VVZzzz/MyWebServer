@@ -33,7 +33,7 @@ class Epoller {
   std::vector<SP_Channel> poll();
   // used by poll
   void getEventsRequest(std::vector<SP_Channel>& chnvec);
-  //为某个channel添加定时器
+  //为某个channel添加定时器,一旦定时器超时,就执行HttpData::handleClose
   void add_timer(SP_Channel request_data, int timeout);
   int getEpollFd() { return epollFd_; }
   //超时的channel事件处理
@@ -65,6 +65,7 @@ Epoller<T>::~Epoller() {}
 template <typename T>
 void Epoller<T>::epoll_add(SP_Channel request, int timeout) {
   int fd = request->getFd();
+  //这里加一个定时器,对于Http连接,如果这个连接
   if (timeout > 0) {
     add_timer(request, timeout);
     // getHolder返回的是shared_ptr<void>
