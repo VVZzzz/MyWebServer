@@ -63,6 +63,23 @@ enum HttpMethod { METHOD_POST = 1, METHOD_GET, METHOD_HEAD };
 // http版本
 enum HttpVersion { HTTP_10 = 1, HTTP_11 };
 
+//这个类用来处理文件名后缀<--->content-type
+//类似单例模式,多个线程公用一个unordered_map实例
+//只留getMime一个接口
+class MimeType {
+ private:
+  static void init();
+  static std::unordered_map<std::string, std::string> mime;
+  MimeType();
+  MimeType(const MimeType &m);
+
+ public:
+  static std::string getMime(const std::string &suffix);
+
+ private:
+  static pthread_once_t once_control;
+};
+
 //这个enable_shared_from_this<T>允许我们在类的定义中
 //使用shared_ptr<T>/weak_ptr<T> , 即shared_from_this,weak_from_this
 //返回这两个指针
@@ -75,7 +92,9 @@ class HttpData : public std::enable_shared_from_this<HttpData> {
   ~HttpData() { close(fd_); }
   void reset();
   void seperateTimer();
-  void linkTimer(std::shared_ptr<TimerNode<HttpData>> mtimer) { timer_ = mtimer; }
+  void linkTimer(std::shared_ptr<TimerNode<HttpData>> mtimer) {
+    timer_ = mtimer;
+  }
   void handleClose();
   void newEvent();
 
