@@ -109,6 +109,7 @@ class HttpData : public std::enable_shared_from_this<HttpData> {
   ParseState hState_;
   bool keepAlive_;
 
+  //用map保存首部中<Accept: xxxxx>这种信息
   std::map<std::string, std::string> headers_;
   //这个timer_默认初始化为nullptr,由linkTimer进行赋值
   std::weak_ptr<TimerNode<HttpData>> timer_;
