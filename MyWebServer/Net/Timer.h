@@ -9,6 +9,8 @@
 
 #include "../Thread/Mutex.h"
 #include "../Thread/noncopyable.h"
+#include "HttpData.h"
+//class HttpData;
 
 //定时器节点,其中数据类为T
 template <typename T>
@@ -47,7 +49,7 @@ template <typename T>
 TimerNode<T>::~TimerNode() {
   //注意此处,这里是处理定时器超时事件的核心.
   //即析构超时的定时器节点时,进行handleClose
-  if(SPData_) SPData->handleClose();
+  if(SPData_) SPData_->handleClose();
 }
 
 template <typename T>
@@ -77,10 +79,10 @@ void TimerNode<T>::clearReq() {
   this->setDeleted();
 }
 
-template <typename T>
-struct TimerCmp {
-  bool operator()(std::shared_ptr<TimerNode<T>> &a,
-                  std::shared_ptr<TimerNode<T>> &b) const {
+//template <typename T>
+struct HttpTimerCmp {
+  bool operator()(std::shared_ptr<TimerNode<HttpData>> &a,
+                  std::shared_ptr<TimerNode<HttpData>> &b) const {
     return a->getExpTime() > b->getExpTime();
   }
 };
@@ -100,13 +102,13 @@ class TimerManager {
 
  private:
   typedef std::shared_ptr<TimerNode<T>> SPTimerNode;
-  std::priority_queue<SPTimerNode, std::deque<SPTimerNode>, TimerCmp<SPTimerNode>>
+  std::priority_queue<SPTimerNode, std::deque<SPTimerNode>, HttpTimerCmp>
       timerNodeQueue_;
 };
 
 template <typename T>
 void TimerManager<T>::addTimer(std::shared_ptr<T> SPData, int timeout) {
-  SPTimerNode node(new TimerNode<T>(SPData, timeout));
+  SPTimerNode new_node(new TimerNode<T>(SPData, timeout));
   timerNodeQueue_.push(new_node);
   SPData->linkTimer(new_node);
 }
@@ -136,9 +138,9 @@ void TimerManager<T>::handleExpiredEvent() {
   while (!timerNodeQueue_.empty()) {
     SPTimerNode ptimer_now = timerNodeQueue_.top();
     if (ptimer_now->isDeleted())
-      timerNodeQueue.pop();
+      timerNodeQueue_.pop();
     else if (ptimer_now->isValid() == false)
-      timerNodeQueue.pop();
+      timerNodeQueue_.pop();
     else
       break;
   }

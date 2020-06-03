@@ -40,6 +40,7 @@ set (NET_SRC
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/EventLoopThreadPool.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/HttpData.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Server.cpp
+    main.cpp
 )
 include_directories(${PROJECT_SOURCE_DIR}/Net)
 

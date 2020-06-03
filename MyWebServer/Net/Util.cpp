@@ -30,7 +30,7 @@ const int WRITEEVENT = (::getenv("USE_POLL") ? (POLLOUT)
                                             : (EPOLLOUT | EPOLLET));
                                     
 //epoll监听事件总数,等待事件
-const int EVENTSNUM = 4096;
+const int EVENTSUM = 4096;
 const int EPOLLWAIT_TIME = 10000;  //ms
 
 ssize_t readn(int fd, void *buff, size_t n) {
@@ -199,7 +199,11 @@ int socket_bind_listen(int port) {
 
   // 创建socket(IPv4 + TCP)，返回监听描述符
   int listen_fd = 0;
-  if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) return -1;
+  if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
+  {
+    printf("create socket error: %d\n",errno);
+    return -1;
+  }
 
   // 消除bind时"Address already in use"错误
   //即端口复用

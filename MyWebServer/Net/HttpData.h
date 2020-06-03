@@ -12,9 +12,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "Timer.h"
+//#include "Timer.h"
+template <typename T>
+class TimerNode;
 
 class EventLoop;
+class Channel;
 
 //解析整体报文的状态:主状态机
 //后面的为从状态机
