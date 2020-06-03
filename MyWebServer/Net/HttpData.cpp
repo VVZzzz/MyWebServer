@@ -137,7 +137,7 @@ void HttpData::reset() {
   hState_ = H_START;
   headers_.clear();
   // keepAlive_ = false;
-  //解绑定时器节点,并删除这个节点
+  //解绑定时器节点(真正的删除在timeManager中的handleExpired中)
   if (timer_.lock()) {
     std::shared_ptr<TimerNode<HttpData>> my_timer(timer_.lock());
     my_timer->clearReq();
@@ -145,7 +145,7 @@ void HttpData::reset() {
   }
 }
 
-//解绑定时器节点,并删除这个节点
+//解绑定时器节点(真正的删除在timeManager中的handleExpired中)
 void HttpData::seperateTimer() {
   if (timer_.lock()) {
     std::shared_ptr<TimerNode<HttpData>> my_timer(timer_.lock());
@@ -333,7 +333,79 @@ void HttpData::handleError(int fd, int err_num, std::string short_msg) {
   writen(fd, send_buff, strlen(send_buff));
 }
 
-void HttpData::
+// handleConn是在handleRead和handleWrite完毕之后
+//再执行的
+void HttpData::handleConn() {
+  //解绑定时器节点(真正的删除在timeManager中的handleExpired中)
+  seperateTimer();
+  __uint32_t &events_ = channel_->getEvents();
+  if (!error_ && connectionState_ == H_CONNECTED) {
+    if (events_ != 0) {
+      int timeout = DEFAULT_EXPIRED_TIME;
+      if (keepAlive_) timeout = DEFAULT_KEEP_ALIVE_TIME;
+      //同时设置读事件和写事件时(见http的handleRead和handleWrite)
+      //先处理写事件
+      if ((events_ & EPOLLIN) && (events_ & EPOLLOUT)) {
+        events_ = __uint32_t(0);
+        events_ |= EPOLLOUT;
+      }
+      // events_ |= (EPOLLET | EPOLLONESHOT);
+      events_ |= EPOLLET;
+      loop_->updateToPoller(channel_, timeout);
+    }
+    // events_ == 0(即当前http请求和回应已完成) 但设为keepAlive的情况(长连接)
+    //此时如果是短连接,那就定时器为2min30s
+    else if (keepAlive_) {
+      events_ |= (EPOLLIN | EPOLLET);
+      // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
+      int timeout = DEFAULT_KEEP_ALIVE_TIME;
+      loop_->updateToPoller(channel_, timeout);
+    }
+    // events_ == 0(即当前http请求和回应已完成) 但设为短连接
+    //此时如果是长连接,那就定时器为5min
+    else {
+      // cout << "close normally" << endl;
+      // loop_->shutdown(channel_);
+      // loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
+      events_ |= (EPOLLIN | EPOLLET);
+      // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
+      int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
+      loop_->updateToPoller(channel_, timeout);
+    }
+  }
+  //此处注意:connectionState为DISCONNECTING是我们read结果只
+  //收到0个字节,这说明对方关闭了连接,但究竟是shutdown(WR)还是close?
+  //所以server这里,如果还有要发送的数据(events_&EPOLLOUT),那么就
+  //继续发送(此时如果client是close的话会直接收到RST报文,连接也对应关闭)
+  //(如果client是shutdown的话,server会继续把数据发完再断开)
+  else if (!error_ && connectionState_ == H_DISCONNECTING &&
+           (events_ & EPOLLOUT)) {
+    //再次发送数据并重新设置EPOLLET
+    //这里没有重新绑定定时器
+    events_ = (EPOLLOUT | EPOLLET);
+  }
+  //这里是对方关闭了连接,且server这里没有要发送的数据,直接关闭连接即可
+  //或者是发生错误,不得不关闭连接
+  //关闭连接(close(connfd))发生在HttpData的析构函数中,也就是在handleClose->removeChannel
+  else {
+    // cout << "close with errors" << endl;
+    loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
+  }
+}
+
+//关闭连接,删除channel
+void HttpData::handleClose() {
+  connectionState_ = H_DISCONNECTED;
+  std::shared_ptr<HttpData> guard(shared_from_this());
+  //在removedFromPoller中,发生close(fd)关闭连接
+  loop_->removedFromPoller(channel_);
+}
+
+//在server里handNewConn中使用(将这个http事件插入到线程loop中)
+void HttpData::newEvent(){
+  channel_->setEvents(READEVENT /*| EPOLLONESHOT*/);
+    loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);
+}
 
 /**********************************以下是解析Http行,首部,body等工具函数********************/
 //一:解析请求行

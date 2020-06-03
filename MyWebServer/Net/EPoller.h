@@ -116,6 +116,8 @@ void Epoller<T>::epoll_del(SP_Channel request) {
   if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, &event) < 0) {
     perror("epoll_del error");
   }
+  //这个reset,一旦shared_ptr引用减到0,自动析构,HttpData析构函数里就是close(fd)
+  //关闭连接
   fd2channel_[fd].reset();
   fd2data_[fd].reset();
 }

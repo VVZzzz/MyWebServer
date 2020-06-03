@@ -22,10 +22,14 @@ set(LIB_SRC
     ${PROJECT_SOURCE_DIR}/MyWebServer/Log/Logging.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Log/LogStream.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/EventLoop.cpp
-    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Poller.cpp
+    #${PROJECT_SOURCE_DIR}/MyWebServer/Net/Poller.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Channel.cpp
-    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/PollPoller.cpp
+    #${PROJECT_SOURCE_DIR}/MyWebServer/Net/PollPoller.cpp
     ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Util.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/EventLoopThread.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/EventLoopThreadPool.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/HttpData.cpp
+    ${PROJECT_SOURCE_DIR}/MyWebServer/Net/Server.cpp
     
 )
 add_library(libserver_base ${LIB_SRC})

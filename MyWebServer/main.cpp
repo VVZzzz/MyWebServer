@@ -4,6 +4,8 @@
 #include <string>
 
 #include "Log/Logging.h"
+#include "Net/EventLoop.h"
+#include "Net/Server.h"
 
 int main(int argc, char **argv) {
   //默认开启线程数和端口
@@ -39,5 +41,11 @@ int main(int argc, char **argv) {
 #ifndef _PTHREADS
   LOG << "_PTHREADS is not defined !";
 #endif
+  //开启服务器
+  EventLoop mainloop;
+  Server httpServer(&mainloop,threadNum,port);
+  httpServer.start();
+  mainloop.loop();
+  return 0;
 
 }

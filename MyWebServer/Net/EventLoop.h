@@ -45,7 +45,7 @@ class EventLoop : noncopyable {
 
   // used by epoll
   void removedFromPoller(std::shared_ptr<Channel> channel) {
-    shutDownWR(channel->getFd());
+    //shutDownWR(channel->getFd());
     poller_->epoll_del(channel);
   }
   void updateToPoller(std::shared_ptr<Channel> channel, int timeout = 0) {
