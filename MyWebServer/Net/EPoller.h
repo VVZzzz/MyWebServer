@@ -97,7 +97,7 @@ void Epoller<T>::epoll_mod(SP_Channel request, int timeout) {
     event.data.fd = fd;
     event.events = request->getEvents();
     if (epoll_ctl(epollFd_, EPOLL_CTL_MOD, fd, &event) < 0) {
-      //perror("epoll_mod error");
+      perror("epoll_mod error");
       fd2channel_[fd].reset();
     }
   }

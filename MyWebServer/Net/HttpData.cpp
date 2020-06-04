@@ -370,10 +370,10 @@ void HttpData::handleConn() {
       //cout << "close normally" << endl;
       loop_->shutdown(channel_);
       loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
-      events_ |= (EPOLLIN | EPOLLET);
-      // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
-      int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
-      loop_->updateToPoller(channel_, timeout);
+      //events_ |= (EPOLLIN | EPOLLET);
+      // events_ |= (EPOLLIN | EPOLLET /*| EPOLLONESHOT*/);
+      //int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
+      //loop_->updateToPoller(channel_, timeout);
     }
   }
   //此处注意:connectionState为DISCONNECTING是我们read结果只
