@@ -39,7 +39,7 @@ void Server::start() {
   acceptChannel_->setReadHandler(std::bind(&Server::handleNewConn, this));
   //对于当前这个accept channel,如果监听的events变化了,就update
   acceptChannel_->setConnHandler(std::bind(&Server::handleThisConn, this));
-  loop_->addToPoller(acceptChannel_);
+  loop_->addToPoller(acceptChannel_,0);
   started_ = true;
 }
 
@@ -94,5 +94,5 @@ cout << "optval ==" << optval << endl;
     loop->queueInLoop(std::bind(&HttpData::newEvent,req_info));
   }
   //如果运行到此处,说明没有新的连接或者出错,重新设置
-  acceptChannel_->setEvents(READEVENT);
+  acceptChannel_->setEvents(EPOLLIN | EPOLLET);
 }

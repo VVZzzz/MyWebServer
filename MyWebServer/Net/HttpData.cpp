@@ -170,7 +170,7 @@ void HttpData::handleRead() {
       inBuffer_.clear();
       break;
     }
-     cout << inBuffer_ << endl;
+    cout << inBuffer_ << endl;
     if (read_num < 0) {
       perror("Read request error: ");
       error_ = true;
@@ -189,7 +189,7 @@ void HttpData::handleRead() {
         // error_ = true;
         break;
       }
-       cout << "readnum == 0" << endl;
+      cout << "readnum == 0" << endl;
     }
     //状态机:从PARSE_URI开始
     if (state_ == STATE_PARSE_URI) {
@@ -237,7 +237,7 @@ void HttpData::handleRead() {
       if (headers_.find("Content-length") != headers_.end()) {
         content_length = stoi(headers_["Content-length"]);
       } else {
-         cout << "(state_ == STATE_RECV_BODY)" << endl;
+        cout << "(state_ == STATE_RECV_BODY)" << endl;
         error_ = true;
         handleError(fd_, 400,
                     "Bad Request: Post Lack of argument (Content-length)");
@@ -256,13 +256,13 @@ void HttpData::handleRead() {
         state_ = STATE_FINISH;
         break;
       } else {
-         cout << "state_ == STATE_ANALYSIS" << endl;
+        cout << "state_ == STATE_ANALYSIS" << endl;
         error_ = true;
         break;
       }
     }
   } while (false);
-   cout << "state_=" << state_ << endl;
+  cout << "state_=" << state_ << endl;
   //至此已经分析了请求报文,并得到要相应的要响应
   //的报文内容,下面要发送响应报文了
   if (!error_) {
@@ -404,9 +404,9 @@ void HttpData::handleClose() {
 }
 
 //在server里handNewConn中使用(将这个http事件插入到线程loop中)
-void HttpData::newEvent(){
-  channel_->setEvents(READEVENT /*| EPOLLONESHOT*/);
-    loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);
+void HttpData::newEvent() {
+  channel_->setEvents(READEVENT | EPOLLONESHOT);
+  loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);
 }
 
 /**********************************以下是解析Http行,首部,body等工具函数********************/

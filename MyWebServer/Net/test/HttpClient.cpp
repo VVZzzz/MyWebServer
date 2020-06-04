@@ -85,10 +85,10 @@ int main(int argc, char *argv[]) {
 
   // 发
   // GET  HTTP/1.1
-  // Host: 192.168.52.135:8888
+  // Host: 192.168.115.129:80
   // Content-Type: application/x-www-form-urlencoded
   // Connection: Keep-Alive
-  p = "GET / HTTP/1.1\r\nHost: 192.168.115.1:8888\r\nContent-Type: "
+  p = "GET / HTTP/1.1\r\nHost: 192.168.115.129:80\r\nContent-Type: "
       "application/x-www-form-urlencoded\r\nConnection: Keep-Alive\r\n\r\n";
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {

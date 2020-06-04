@@ -56,7 +56,7 @@ EventLoop::EventLoop()
 }
 
 EventLoop::~EventLoop() {
-  assert(!looping_);
+  // assert(!looping_);
   // wakeupChannel_->disableAll();
   // wakeupChannel_->remove();
   close(wakeupFd_);
@@ -169,6 +169,7 @@ void EventLoop::handleRead() {
   if (n != sizeof one) {
     LOG << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
   }
+  wakeupChannel_->setEvents(READEVENT);
 }
 
 void EventLoop::handleConn() {

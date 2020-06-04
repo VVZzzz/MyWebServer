@@ -70,9 +70,7 @@ void Epoller<T>::epoll_add(SP_Channel request, int timeout) {
     add_timer(request, timeout);
     // getHolder返回的是shared_ptr<void>
     //此处转换一下智能指针类型
-    std::shared_ptr<T> tptr = std::static_pointer_cast<T>(request->getHolder());
-    fd2data_[fd] = tptr;
-    tptr.reset();
+    fd2data_[fd] = std::static_pointer_cast<T>(request->getHolder());
   }
   struct epoll_event event;
   event.data.fd = fd;
@@ -130,11 +128,16 @@ std::vector<SP_Channel> Epoller<T>::poll() {
     // 10000ms
     int event_count =
         epoll_wait(epollFd_, &*events_.begin(), events_.size(), EPOLLWAIT_TIME);
-    if (event_count < 0) perror("epoll wait error");
+    if (event_count < 0) {
+      if(errno==EINTR) continue;  //debug用
+      perror("epoll wait error");
+    }
+
     //先定义且预留空间(为了效率)
     std::vector<SP_Channel> req_data(event_count);
     getEventsRequest(req_data);
     if (!req_data.empty()) return req_data;
+
   }
 }
 

@@ -11,41 +11,44 @@ int main(int argc, char **argv) {
   //默认开启线程数和端口
   int threadNum = 4;
   int port = 80;
-  std::string logpath = "./server.log";
+  std::string logPath = "./server.log";
   //解析命令行
   //-p port -t threadNum -l logpath
+
   int opt;
-  const char *optstr = "ptl";
-  while ((opt = getopt(argc, argv, optstr)) != -1) {
+  const char *str = "t:l:p:";
+  while ((opt = getopt(argc, argv, str)) != -1) {
     switch (opt) {
-      case 'p':
-        port = atoi(optarg);
-        break;
-      case 't':
+      case 't': {
         threadNum = atoi(optarg);
         break;
-      case 'l':
-        logpath = optarg;
-        if (logpath.size() < 2 || optarg[0] != '/') {
-          std::cout << "logpath starts with \"/\"\n";
-          exit(0);
+      }
+      case 'l': {
+        logPath = optarg;
+        if (logPath.size() < 2 || optarg[0] != '/') {
+          printf("logPath should start with \"/\"\n");
+          abort();
         }
         break;
+      }
+      case 'p': {
+        port = atoi(optarg);
+        break;
+      }
       default:
-        std::cout << "usage: [-p] port [-t] thread [-l] logdir" << std::endl;
         break;
     }
   }
-  Logger::setLogFileName(logpath);
+
+  Logger::setLogFileName(logPath);
   // STL库在多线程上应用
 #ifndef _PTHREADS
   LOG << "_PTHREADS is not defined !";
 #endif
   //开启服务器
   EventLoop mainloop;
-  Server httpServer(&mainloop,threadNum,port);
+  Server httpServer(&mainloop, threadNum, port);
   httpServer.start();
   mainloop.loop();
   return 0;
-
 }

@@ -14,6 +14,7 @@
 //每个Channel对象只属于一个Eventloop,故只属于一个IO线程
 //只负责一个fd的IO事件分发,但并不拥有该fd
 //析构时并不关闭fd
+class HttpData;
 class EventLoop;
 class Channel {
  public:

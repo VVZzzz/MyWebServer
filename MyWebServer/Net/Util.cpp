@@ -18,20 +18,20 @@ const int MAX_BUFF = 4096;
 //其中epoll采用ET触发,而不用LT触发
 // On Linux, the constants of poll(2) and epoll(4)
 // are expected to be the same.
-static_assert(EPOLLIN == POLLIN,        "epoll uses same flag values as poll");
-static_assert(EPOLLPRI == POLLPRI,      "epoll uses same flag values as poll");
-static_assert(EPOLLOUT == POLLOUT,      "epoll uses same flag values as poll");
-static_assert(EPOLLRDHUP == POLLRDHUP,  "epoll uses same flag values as poll");
-static_assert(EPOLLERR == POLLERR,      "epoll uses same flag values as poll");
-static_assert(EPOLLHUP == POLLHUP,      "epoll uses same flag values as poll");
+static_assert(EPOLLIN == POLLIN, "epoll uses same flag values as poll");
+static_assert(EPOLLPRI == POLLPRI, "epoll uses same flag values as poll");
+static_assert(EPOLLOUT == POLLOUT, "epoll uses same flag values as poll");
+static_assert(EPOLLRDHUP == POLLRDHUP, "epoll uses same flag values as poll");
+static_assert(EPOLLERR == POLLERR, "epoll uses same flag values as poll");
+static_assert(EPOLLHUP == POLLHUP, "epoll uses same flag values as poll");
 const int READEVENT = (::getenv("USE_POLL") ? (POLLIN | POLLPRI)
                                             : (EPOLLIN | EPOLLPRI | EPOLLET));
-const int WRITEEVENT = (::getenv("USE_POLL") ? (POLLOUT)
-                                            : (EPOLLOUT | EPOLLET));
-                                    
-//epoll监听事件总数,等待事件
+const int WRITEEVENT =
+    (::getenv("USE_POLL") ? (POLLOUT) : (EPOLLOUT | EPOLLET));
+
+// epoll监听事件总数,等待事件
 const int EVENTSUM = 4096;
-const int EPOLLWAIT_TIME = 10000;  //ms
+const int EPOLLWAIT_TIME = 10000;  // ms
 
 ssize_t readn(int fd, void *buff, size_t n) {
   size_t nleft = n;
@@ -199,9 +199,8 @@ int socket_bind_listen(int port) {
 
   // 创建socket(IPv4 + TCP)，返回监听描述符
   int listen_fd = 0;
-  if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
-  {
-    printf("create socket error: %d\n",errno);
+  if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    printf("create socket error: %d\n", errno);
     return -1;
   }
 
