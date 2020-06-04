@@ -70,7 +70,7 @@ ssize_t readn(int fd, std::string &inBuffer, bool &zero) {
       else if (errno == EAGAIN) {
         return readSum;
       } else {
-        perror("read error");
+        //perror("read error");
         return -1;
       }
     } else if (nread == 0) {
@@ -99,7 +99,7 @@ ssize_t readn(int fd, std::string &inBuffer) {
       else if (errno == EAGAIN) {
         return readSum;
       } else {
-        perror("read error");
+        //perror("read error");
         return -1;
       }
     } else if (nread == 0) {

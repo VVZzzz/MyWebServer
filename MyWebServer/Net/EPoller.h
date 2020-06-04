@@ -81,7 +81,7 @@ void Epoller<T>::epoll_add(SP_Channel request, int timeout) {
   fd2channel_[fd] = request;
   // epoll_add
   if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, fd, &event) < 0) {
-    perror("epoll_add error");
+    //perror("epoll_add error");
     fd2channel_[fd].reset();
   }
 }
@@ -97,7 +97,7 @@ void Epoller<T>::epoll_mod(SP_Channel request, int timeout) {
     event.data.fd = fd;
     event.events = request->getEvents();
     if (epoll_ctl(epollFd_, EPOLL_CTL_MOD, fd, &event) < 0) {
-      perror("epoll_mod error");
+      //perror("epoll_mod error");
       fd2channel_[fd].reset();
     }
   }
@@ -112,7 +112,7 @@ void Epoller<T>::epoll_del(SP_Channel request) {
   // event.events = 0;
   // request->EqualAndUpdateLastEvents()
   if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, &event) < 0) {
-    perror("epoll_del error");
+    //perror("epoll_del error");
   }
   //这个reset,一旦shared_ptr引用减到0,自动析构,HttpData析构函数里就是close(fd)
   //关闭连接
@@ -130,7 +130,7 @@ std::vector<SP_Channel> Epoller<T>::poll() {
         epoll_wait(epollFd_, &*events_.begin(), events_.size(), EPOLLWAIT_TIME);
     if (event_count < 0) {
       if(errno==EINTR) continue;  //debug用
-      perror("epoll wait error");
+      //perror("epoll wait error");
     }
 
     //先定义且预留空间(为了效率)
@@ -157,7 +157,7 @@ void Epoller<T>::getEventsRequest(std::vector<SP_Channel>& chnvec) {
       chnvec[i] = cur_channel;
 
     } else {
-      LOG << "SP cur_req is invalid!";
+      //LOG << "SP cur_req is invalid!";
     }
   }
 }
@@ -167,8 +167,8 @@ void Epoller<T>::add_timer(SP_Channel request_data, int timeout) {
   std::shared_ptr<T> t = std::static_pointer_cast<T>(request_data->getHolder());
   if (t)
     timermanager_.addTimer(t, timeout);
-  else
-    LOG << "timer add fail";
+  else{}
+    //LOG << "timer add fail";
 }
 
 //删除超时的那些定时器节点

@@ -24,7 +24,7 @@ __thread EventLoop *t_loopInThisThread = 0;
 int createEventfd() {
   int evtfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
   if (evtfd < 0) {
-    LOG << "Failed in eventfd";
+    //LOG << "Failed in eventfd";
     abort();
   }
 }
@@ -41,9 +41,9 @@ EventLoop::EventLoop()
       eventHandling_(false),
       wakeupFd_(createEventfd()),
       wakeupChannel_(new Channel(this, wakeupFd_)) {
-  if (t_loopInThisThread)
-    LOG << "Another EventLoop " << t_loopInThisThread
-        << " exists in this thread " << threadId_;
+  if (t_loopInThisThread){}
+    //LOG << "Another EventLoop " << t_loopInThisThread
+     //   << " exists in this thread " << threadId_;
   else
     t_loopInThisThread = this;
   // poll和epoll两种复用模型,epoll采用EPOLLET触发
@@ -158,7 +158,7 @@ void EventLoop::wakeup() {
   uint64_t one = 1;
   ssize_t n = writen(wakeupFd_, (char *)(&one), sizeof one);
   if (n != sizeof one) {
-    LOG << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
+    //LOG << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
   }
 }
 
@@ -167,7 +167,7 @@ void EventLoop::handleRead() {
   uint64_t one = 1;
   ssize_t n = readn(wakeupFd_, &one, sizeof one);
   if (n != sizeof one) {
-    LOG << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
+    //LOG << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
   }
   wakeupChannel_->setEvents(READEVENT);
 }

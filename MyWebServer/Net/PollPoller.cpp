@@ -16,14 +16,14 @@ int PollPoller::poll(int timeoutMs, ChannelList* activeChannels) {
   int numEvents = ::poll(&*pollfds_.begin(), pollfds_.size(), timeoutMs);
   int saveErrno = errno;
   if (numEvents > 0) {
-    LOG << numEvents << " events happend";
+    //LOG << numEvents << " events happend";
     fillActiveChannels(numEvents,activeChannels);
   } else if (numEvents == 0) {
-    LOG << "nothing happend";
+    //LOG << "nothing happend";
   } else {
     if (saveErrno != EINTR) {
       errno = saveErrno;
-      LOG << "poll error: PollPoller::Poll()";
+      //LOG << "poll error: PollPoller::Poll()";
     }
   }
   return 1;

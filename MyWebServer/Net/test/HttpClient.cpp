@@ -16,7 +16,7 @@ using namespace std;
 
 #define MAXSIZE 1024
 #define IPADDRESS "127.0.0.1"
-#define SERV_PORT 8888
+#define SERV_PORT 80
 #define FDSIZE 1024
 #define EPOLLEVENTS 20
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   const char *p = " ";
   if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
     setSocketNonBlocking1(sockfd);
-    cout << "1:" << endl;
+    cout << "\n1:\n" << endl;
     ssize_t n = write(sockfd, p, strlen(p));
     cout << "strlen(p) = " << strlen(p) << endl;
     sleep(1);
@@ -61,48 +61,52 @@ int main(int argc, char *argv[]) {
     printf("%s", buff);
     close(sockfd);
   } else {
-    perror("err1");
+    //perror("err1");
   }
-  sleep(1);
+  sleep(3);
 
-  // 发"GET  HTTP/1.1"
-  p = "GET  HTTP/1.1";
+  // GET /hello HTTP/1.1
+
+  //\r\n
+  p = "GET /hello HTTP/1.1\r\nConnection: Keep-Alive\r\n\r\n";
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
     setSocketNonBlocking1(sockfd);
-    cout << "2:" << endl;
+    cout << "\n2:\n" << endl;
     ssize_t n = write(sockfd, p, strlen(p));
     cout << "strlen(p) = " << strlen(p) << endl;
-    sleep(1);
+    sleep(2);
+    memset(buff,0,4096);
     n = read(sockfd, buff, 4096);
     cout << "n=" << n << endl;
     printf("%s", buff);
     close(sockfd);
   } else {
-    perror("err2");
+    //perror("err2");
   }
-  sleep(1);
+  sleep(3);
 
   // 发
   // GET  HTTP/1.1
   // Host: 192.168.115.129:80
   // Content-Type: application/x-www-form-urlencoded
   // Connection: Keep-Alive
-  p = "GET / HTTP/1.1\r\nHost: 192.168.115.129:80\r\nContent-Type: "
+  p = "GET /hello HTTP/1.1\r\nHost: 192.168.115.129:80\r\nContent-Type: "
       "application/x-www-form-urlencoded\r\nConnection: Keep-Alive\r\n\r\n";
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
     setSocketNonBlocking1(sockfd);
-    cout << "3:" << endl;
+    cout << "\n3:\n" << endl;
     ssize_t n = write(sockfd, p, strlen(p));
     cout << "strlen(p) = " << strlen(p) << endl;
-    sleep(1);
+    sleep(3);
+    memset(buff,0,4096);
     n = read(sockfd, buff, 4096);
     cout << "n=" << n << endl;
     printf("%s", buff);
     close(sockfd);
   } else {
-    perror("err3");
+    //perror("err3");
   }
   return 0;
 }

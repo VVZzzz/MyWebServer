@@ -26,7 +26,7 @@ Server::Server(EventLoop *loop, int threadNum, int port)
   handle_for_sigpipe();
   // listen监听,置为非阻塞
   if (setSocketNonBlocking(listenFd_) < 0) {
-    perror("set socket non block failed");
+    //perror("set socket non block failed");
     abort();
   }
 }
@@ -60,8 +60,8 @@ void Server::handleNewConn() {
     //注意:不是说一个线程只能处理一个客户,一个线程用poll可等待多个事件
     //IO复用
     EventLoop *loop = eventLoopThreadPool_->getNextLoop();
-    LOG << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":"
-        << ntohs(client_addr.sin_port);
+    //LOG << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":"
+     //   << ntohs(client_addr.sin_port);
     /*
 // TCP的保活机制默认是关闭的
 int optval = 0;
@@ -76,7 +76,7 @@ cout << "optval ==" << optval << endl;
     }
     // 设为非阻塞模式
     if (setSocketNonBlocking(accept_fd) < 0) {
-      LOG << "Set non block failed!";
+      //LOG << "Set non block failed!";
       // perror("Set non block failed!");
       return;
     }

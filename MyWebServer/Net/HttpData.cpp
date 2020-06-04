@@ -165,14 +165,14 @@ void HttpData::handleRead() {
   do {
     bool zero = false;
     int read_num = readn(fd_, inBuffer_, zero);
-    LOG << "Request: " << inBuffer_;
+    //LOG << "Request: " << inBuffer_;
     if (connectionState_ == H_DISCONNECTING) {
       inBuffer_.clear();
       break;
     }
-    cout << inBuffer_ << endl;
+    // cout << inBuffer_ << endl;
     if (read_num < 0) {
-      perror("Read request error: ");
+      //perror("Read request error: ");
       error_ = true;
       handleError(fd_, 400, "Bad Request");
       break;
@@ -189,7 +189,7 @@ void HttpData::handleRead() {
         // error_ = true;
         break;
       }
-      cout << "readnum == 0" << endl;
+      // cout << "readnum == 0" << endl;
     }
     //状态机:从PARSE_URI开始
     if (state_ == STATE_PARSE_URI) {
@@ -197,8 +197,8 @@ void HttpData::handleRead() {
       if (flag == PARSE_URI_AGAIN)
         break;
       else if (flag == PARSE_URI_ERROR) {
-        perror("parse uri error:");
-        LOG << "FD = " << fd_ << "," << inBuffer_ << "******";
+        //perror("parse uri error:");
+        //LOG << "FD = " << fd_ << "," << inBuffer_ << "******";
         inBuffer_.clear();
         error_ = true;
         handleError(fd_, 400, "Bad Request");
@@ -213,7 +213,7 @@ void HttpData::handleRead() {
       if (flag == PARSE_HEADER_AGAIN)
         break;
       else if (flag == PARSE_HEADER_ERROR) {
-        perror("parse header error:");
+        //perror("parse header error:");
         error_ = true;
         handleError(fd_, 400, "Bad Request");
         break;
@@ -237,7 +237,7 @@ void HttpData::handleRead() {
       if (headers_.find("Content-length") != headers_.end()) {
         content_length = stoi(headers_["Content-length"]);
       } else {
-        cout << "(state_ == STATE_RECV_BODY)" << endl;
+        // cout << "(state_ == STATE_RECV_BODY)" << endl;
         error_ = true;
         handleError(fd_, 400,
                     "Bad Request: Post Lack of argument (Content-length)");
@@ -256,13 +256,13 @@ void HttpData::handleRead() {
         state_ = STATE_FINISH;
         break;
       } else {
-        cout << "state_ == STATE_ANALYSIS" << endl;
+        // cout << "state_ == STATE_ANALYSIS" << endl;
         error_ = true;
         break;
       }
     }
   } while (false);
-  cout << "state_=" << state_ << endl;
+  //cout << "state_=" << state_ << endl;
   //至此已经分析了请求报文,并得到要相应的要响应
   //的报文内容,下面要发送响应报文了
   if (!error_) {
@@ -298,7 +298,7 @@ void HttpData::handleWrite() {
   if (!error_ && connectionState_ != H_DISCONNECTED) {
     __uint32_t &events_ = channel_->getEvents();
     if (writen(fd_, outBuffer_) < 0) {
-      perror("writen");
+      //perror("writen");
       events_ = 0;
       error_ = true;
     }
@@ -356,7 +356,7 @@ void HttpData::handleConn() {
       loop_->updateToPoller(channel_, timeout);
     }
     // events_ == 0(即当前http请求和回应已完成) 但设为keepAlive的情况(长连接)
-    //此时如果是短连接,那就定时器为2min30s
+    //此时如果是长连接,那就定时器为5min
     else if (keepAlive_) {
       events_ |= (EPOLLIN | EPOLLET);
       // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
@@ -364,11 +364,12 @@ void HttpData::handleConn() {
       loop_->updateToPoller(channel_, timeout);
     }
     // events_ == 0(即当前http请求和回应已完成) 但设为短连接
-    //此时如果是长连接,那就定时器为5min
+    //此时如果是短连接: 回应方式一: 那就定时器为2min30s(超时断开)
+    //回应方式二: 直接shutdown并close.(注意先shutdown,再close详见那篇博客)
     else {
-      cout << "close normally" << endl;
-      // loop_->shutdown(channel_);
-      // loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
+      //cout << "close normally" << endl;
+      loop_->shutdown(channel_);
+      loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
       events_ |= (EPOLLIN | EPOLLET);
       // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
       int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
@@ -390,7 +391,7 @@ void HttpData::handleConn() {
   //或者是发生错误,不得不关闭连接
   //关闭连接(close(connfd))发生在HttpData的析构函数中,也就是在handleClose->removeChannel
   else {
-    cout << "close with errors" << endl;
+    //cout << "close with errors" << endl;
     loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
   }
 }
@@ -462,7 +463,7 @@ URIState HttpData::parseURI() {
     }
     pos = _pos;
   }
-  cout << "fileName_: " << fileName_ << endl;
+  //cout << "fileName_: " << fileName_ << endl;
 
   // step3: HTTP版本号
   pos = request_line.find("/", pos);
