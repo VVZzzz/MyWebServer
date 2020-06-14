@@ -29,6 +29,10 @@ $make
 
 ## Model
 多线程reactor模型+线程池+定时器+双缓冲区异步日志系统,IO复用采用epoll-et方式.
-![model]("./pic/model.png")
+![model]("https://github.com/VVZzzz/MyWebServer/blob/master/pic/model.png")
 ## Performance Test
-采用WebBench进行长连接与短链接的压力测试,详细报告点[这里]()
+采用[WebBench](https://github.com/VVZzzz/MyWebServer/tree/master/WebBench)进行长连接与短链接的压力测试,如下:  
+MyServer短链接: ![test]("https://github.com/VVZzzz/MyWebServer/blob/master/pic/MyServer%E7%9F%AD%E8%BF%9E%E6%8E%A560s-release.PNG")
+MyServer长连接: ![test1]("https://github.com/VVZzzz/MyWebServer/blob/master/pic/MyServer%E9%95%BF%E8%BF%9E%E6%8E%A560s-release.PNG")
+Muduo短链接: ![test2]("https://github.com/VVZzzz/MyWebServer/blob/master/pic/muduo%E7%9F%AD%E8%BF%9E%E6%8E%A560s-release.PNG")
+Muduo长链接: ![test3]("https://github.com/VVZzzz/MyWebServer/blob/master/pic/muduo%E9%95%BF%E8%BF%9E%E6%8E%A560s-release.PNG")
